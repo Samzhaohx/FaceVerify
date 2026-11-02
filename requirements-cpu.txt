@@ -1,0 +1,8 @@
+# ===== CPU 版（推荐先用这个跑通）=====
+# 适用：没有 NVIDIA 显卡 / 不想折腾 CUDA / 笔记本续航优先
+# 实测：i7 八代移动端，1280x720 输入，全链路约 11~36ms，稳定 27~31 FPS
+#
+#   pip install -r requirements-cpu.txt
+#
+-r requirements.txt
+onnxruntime>=1.16

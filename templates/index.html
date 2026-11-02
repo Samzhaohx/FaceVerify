@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>实时人脸核验 · 静默活体风控</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo"></span>
+    <div>
+      <h1>实时人脸核验 · 静默活体风控</h1>
+      <p class="sub">SCRFD + ArcFace + MiniFASNetV2 + ByteTrack<span class="sep">·</span>{{ mode }}</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="pill" id="devicePill">设备 —</span>
+    <span class="pill" id="fpsPill">— FPS</span>
+    <span class="dot" id="liveDot" title="数据连接"></span>
+  </div>
+</header>
+
+{% if error %}
+<div class="banner error">
+  <strong>启动异常</strong>
+  <pre>{{ error }}</pre>
+</div>
+{% endif %}
+
+<main class="layout">
+  <section class="stage">
+    <div class="video-wrap">
+      <img id="stream" src="{{ url_for('video_feed') }}" alt="实时画面">
+      <div class="video-tag" id="videoTag">LIVE</div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#50c850"></i>验证通过</span>
+      <span><i style="background:#eb3c3c"></i>活体异常</span>
+      <span><i style="background:#ebc828"></i>身份不匹配</span>
+      <span><i style="background:#ebebeb"></i>未知人员</span>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="card result" id="resultCard">
+      <div class="card-head">
+        <span>核验结果</span>
+        <span class="track" id="trackId">#—</span>
+      </div>
+      <div class="state" id="stateText">等待人脸</div>
+      <div class="name" id="nameText">—</div>
+
+      <div class="metric">
+        <div class="metric-head"><span>身份相似度</span><span id="simVal">—</span></div>
+        <div class="bar"><div class="fill" id="simBar"></div><i class="marker" style="left:{{ (thresholds.sim*100)|round(1) }}%"></i></div>
+        <div class="metric-foot">阈值 {{ '%.2f'|format(thresholds.sim) }}（标记线）</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-head"><span>活体置信度</span><span id="liveVal">—</span></div>
+        <div class="bar"><div class="fill" id="liveBar"></div><i class="marker" style="left:{{ (thresholds.live*100)|round(1) }}%"></i></div>
+        <div class="metric-foot">阈值 {{ '%.2f'|format(thresholds.live) }}（标记线）</div>
+      </div>
+
+      <div class="reason" id="reasonText"></div>
+      <ul class="diag" id="diagList" hidden></ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span>运行状态</span><span class="muted" id="uptime">—</span></div>
+      <ul class="kv">
+        <li><span>推理帧率</span><b id="kFps">—</b></li>
+        <li><span>采集帧率</span><b id="kCapFps">—</b></li>
+        <li><span>单帧总耗时</span><b id="kInfer">—</b></li>
+        <li><span>检测 / 识别 / 活体</span><b id="kStages">—</b></li>
+        <li><span>分辨率</span><b id="kSize">—</b></li>
+        <li><span>丢帧</span><b id="kDrop">—</b></li>
+        <li><span>累计帧数</span><b id="kFrames">—</b></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span>人脸库</span>
+        <button id="reloadBtn" class="btn" title="重新读取 encodings/faces.pkl（不会重新扫描 dataset，新增人员请先运行 register.py）">重读库</button>
+      </div>
+      <div class="chips" id="galleryChips">
+        {% for n in gallery %}<span class="chip">{{ n }}</span>{% endfor %}
+        {% if not gallery %}<span class="muted">库为空，先运行 python register.py</span>{% endif %}
+      </div>
+      <div class="metric-foot" id="galleryMeta">—</div>
+      <div class="warn" id="galleryWarn" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span>风控统计</span><span class="muted">人次累计</span></div>
+      <div class="counters">
+        <div class="counter c-pass"><b id="cPassed">0</b><span>通过</span></div>
+        <div class="counter c-spoof"><b id="cSpoof">0</b><span>活体异常</span></div>
+        <div class="counter c-mis"><b id="cMismatch">0</b><span>不匹配</span></div>
+        <div class="counter c-unk"><b id="cUnknown">0</b><span>未知</span></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer class="foot">
+  阈值调整见 <code>config.py</code> 中的 <code>SIM_THRESHOLD</code> / <code>LIVENESS_THRESHOLD</code> / <code>MISMATCH_THRESHOLD</code>
+</footer>
+
+<script>
+  window.__STATUS_INTERVAL__ = {{ status_interval }};
+  window.__THRESHOLDS__ = {{ thresholds|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

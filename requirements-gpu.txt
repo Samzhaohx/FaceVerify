@@ -1,0 +1,20 @@
+# ===== GPU 版 =====
+# 适用：有 NVIDIA 显卡（GTX 1060 以上），追求多人/高分辨率下的帧率
+#
+#   pip install -r requirements-gpu.txt
+#
+# 注意：onnxruntime-gpu 装上 ≠ 能用。还必须装匹配的 CUDA + cuDNN，
+# 版本对应关系以官方文档为准：
+#   https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html
+# 以 onnxruntime-gpu 1.31 为例，需要 CUDA 13.x + cuDNN 9.x，
+# 且 cublasLt64_*.dll / cudnn64_*.dll / zlibwapi.dll 要在 PATH 里。
+#
+# 程序启动时会自动检测；检测不到就静默降级 CPU，不会崩。
+# 想确认是否真的用上了 GPU：看启动日志里 "[SCRFD-det ] 后端 = CUDA"，
+# 或 Web 页面右上角的「设备」标签。
+#
+# 不要同时装 onnxruntime 和 onnxruntime-gpu，会互相覆盖：
+#   pip uninstall -y onnxruntime onnxruntime-gpu && pip install -r requirements-gpu.txt
+
+-r requirements.txt
+onnxruntime-gpu>=1.16

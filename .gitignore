@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Model weights (download separately, see README)
+models/*.onnx
+models/*.zip
+
+# Face gallery and source photos (personal data, never commit)
+encodings/*.pkl
+encodings/aligned/
+dataset/*.jpg
+dataset/*.jpeg
+dataset/*.png
+dataset/*.heic
+dataset/*.heif
+face/
+
+# Runtime output
+outputs/*
+!outputs/.gitkeep
+
+# Docs images (README does not embed images)
+docs/images/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Agent workspace metadata
+.workbuddy/

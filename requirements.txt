@@ -1,0 +1,7 @@
+# 基础依赖（CPU / GPU 都需要）
+# 推理后端二选一，见 requirements-cpu.txt / requirements-gpu.txt
+flask>=3.0
+numpy>=1.24
+opencv-python>=4.8
+pillow>=10.0
+pillow-heif>=0.13        # iPhone 的 HEIC 素材需要
