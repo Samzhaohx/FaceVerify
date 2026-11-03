@@ -26,6 +26,7 @@ sys.path.insert(0, str(ROOT))
 from config import Config
 from engine import FaceEngine
 from fps import FPS
+from algo.imgio import imread_any
 
 
 class ImageSequenceCamera:
@@ -34,7 +35,7 @@ class ImageSequenceCamera:
     def __init__(self, paths: list[Path], width: int = 1280, height: int = 720, repeat: int = 10):
         self.frames = []
         for p in paths:
-            img = cv2.imread(str(p))
+            img = imread_any(p)
             if img is None:
                 continue
             # 等比缩放 + 边界复制填边。注意这里**不能**用黑色填充：

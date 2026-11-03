@@ -20,12 +20,12 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from algo.align import norm_crop
+from algo.imgio import imread_any, imwrite_any
 from algo.detector import SCRFDDetector
 from algo.recognizer import ArcFaceRecognizer, FaceGallery
 from config import Config
@@ -39,36 +39,6 @@ def parse_name(stem: str) -> str:
     name = re.sub(r"[_\-\s]+\d+$", "", name)               # sam_1 / sam-2
     name = name.strip()
     return name or stem
-
-
-def imread_any(path: Path) -> np.ndarray | None:
-    """读图，HEIC 走 pillow-heif。cv2 在 Windows 下不支持中文路径，这里用 imdecode 兜底。"""
-    if path.suffix.lower() in {".heic", ".heif"}:
-        try:
-            import pillow_heif
-            from PIL import Image, ImageOps
-
-            pillow_heif.register_heif_opener()
-            pil = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
-            return cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR)
-        except Exception as e:  # noqa: BLE001
-            logging.warning("HEIC 读取失败 %s: %s", path.name, e)
-            return None
-
-    data = np.fromfile(str(path), dtype=np.uint8)
-    if data.size == 0:
-        return None
-    img = cv2.imdecode(data, cv2.IMREAD_COLOR)
-    if img is None:
-        # 手机照片常带 EXIF 旋转，imdecode 不处理，补一次
-        try:
-            from PIL import Image, ImageOps
-
-            pil = ImageOps.exif_transpose(Image.open(path)).convert("RGB")
-            img = cv2.cvtColor(np.asarray(pil), cv2.COLOR_RGB2BGR)
-        except Exception:  # noqa: BLE001
-            return None
-    return img
 
 
 def main() -> int:
@@ -147,7 +117,7 @@ def main() -> int:
             if args.visualize:
                 crop = norm_crop(img, face.kps, 112)
                 out = saved_dir / f"{name}_{f.stem}_aligned.jpg"
-                cv2.imwrite(str(out), crop)
+                imwrite_any(out, crop)
             logging.info("   ✓ %s  det=%.2f  框=%dpx", f.name, face.score, face.width)
 
         if len(person_embs) >= 2:
